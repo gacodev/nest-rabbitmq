@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    networks:
+      - turbotraffic
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbit-nest
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - turbotraffic
+
+  producer:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: producer
+    ports:
+      - 3000:3000
+    networks:
+      - turbotraffic
+    depends_on:
+      - rabbitmq
+
+  consumer:
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
+    container_name: consumer
+    networks:
+      - turbotraffic
+    depends_on:
+      - rabbitmq
+      - mongodb
+
+networks:
+  turbotraffic:
+    driver: bridge
